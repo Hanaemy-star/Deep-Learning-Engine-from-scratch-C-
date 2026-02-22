@@ -30,4 +30,8 @@ public:
     Tensor& apply_(std::function<double(double)> func);
 
     Tensor apply(std::function<double(double)> func) const;
+
+    Tensor relu() const;
+
+    Tensor operator*(const double& scalar) const;
 };

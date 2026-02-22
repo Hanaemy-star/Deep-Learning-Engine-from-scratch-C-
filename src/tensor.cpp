@@ -90,7 +90,7 @@ void Tensor::print() const {
     }
     for (size_t i = 0; i < shape[0]; i++) {
         for (size_t j = 0; j < shape[1]; j++) {
-            std::cout << this({i, j}) << "\t";
+            std::cout << (*this)({i, j}) << "\t";
         }
         std::cout << std::endl;
     }
@@ -109,4 +109,14 @@ Tensor Tensor::apply(std::function<double(double)> func) const {
         val = func(val);
     }
     return result;
+}
+
+Tensor Tensor::relu() const {
+    Tensor result = *this;
+    return result.apply_([](double val) {return val > 0.0 ? val : 0.0;});
+}
+
+Tensor Tensor::operator*(const double& scalar) const {
+    Tensor result = *this;
+    return result.apply_([scalar](double val) {return val * scalar;});
 }
