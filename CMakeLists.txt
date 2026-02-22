@@ -18,3 +18,9 @@ add_executable(ml-proj main.cpp
         include/matrix.hpp)
 
 target_link_libraries(ml-proj PRIVATE math_lib)
+
+add_executable(test_runner tests/test_main.cpp)
+
+target_link_libraries(test_runner PRIVATE math_lib)
+
+target_include_directories(test_runner PRIVATE include)
