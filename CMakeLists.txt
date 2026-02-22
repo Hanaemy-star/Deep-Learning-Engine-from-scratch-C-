@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(math_biblio)
+project(ml-proj)
 
 set(CMAKE_CXX_STANDARD 20)
 
