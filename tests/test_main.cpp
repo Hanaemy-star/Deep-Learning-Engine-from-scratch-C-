@@ -2,17 +2,22 @@
 
 int main() {
     try {
-        Tensor a({1}, 10.0, true);
-        Tensor b({1}, 5.0, true);
-        Tensor c = a + b;
+        auto a = std::make_shared<Tensor>(std::vector<size_t>{1}, 2.0, true);
+        auto b = std::make_shared<Tensor>(std::vector<size_t>{1}, 3.0, true);
 
-        c.get_grad()->get_data()[0] = 1.0;
-        c._backward();
+        auto c = Tensor::add(a, b);
 
-        std::cout << a.get_grad()->get_data()[0] << std::endl;
-        std::cout << b.get_grad()->get_data()[0] << std::endl;
+        auto d = Tensor::add(c, a);
+
+        std::cout << "Forward pass result (d): " << d->get_data()[0] << std::endl;
+
+        d->backward();
+
+        std::cout << "Gradient of a (Expected 2.0): " << a->get_grad()->get_data()[0] << std::endl;
+        std::cout << "Gradient of b (Expected 1.0): " << b->get_grad()->get_data()[0] << std::endl;
+
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Fatal Error: " << e.what() << std::endl;
     }
 
     return 0;

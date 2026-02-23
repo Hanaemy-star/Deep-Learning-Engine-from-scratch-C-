@@ -2,7 +2,7 @@
 #include <numeric>
 
 
-Tensor::Tensor(std::vector<size_t> shape, double initial_value, bool requires_grad) : shape(shape) {
+Tensor::Tensor(std::vector<size_t> shape, double initial_value, bool requires_grad) : shape(shape) , requires_grad(requires_grad) {
     if (requires_grad) {
         grad = std::make_shared<Tensor>(shape, 0.0, false);
     }
@@ -66,32 +66,31 @@ std::vector<double>& Tensor::get_data() {
     return this->data;
 }
 
-Tensor Tensor::operator+(const Tensor& other) const {
-    if (shape != other.shape) {
-        throw std::invalid_argument("Shapes must match for in-place addition");
-    }
-    Tensor result(shape, 0.0, (this->requires_grad || other.requires_grad));
-    for (size_t i = 0; i < data.size(); i++) {
-        result.data[i] = this->data[i] + other.data[i];
-    }
-    if (result.requires_grad) {
-        auto left_grad = this->get_grad();
-        auto right_grad = other.get_grad();
-        auto res_grad = result.get_grad();
+std::shared_ptr<Tensor> Tensor::add(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b) {
+    if (a->shape != b->shape) throw std::invalid_argument("Shapes must match");
 
-        result._backward = [left_grad, right_grad, res_grad]() {
-            if (left_grad) {
-                for (size_t i = 0; i < left_grad->data.size(); i++) {
-                    left_grad->data[i] += res_grad->data[i];
+    bool req_grad = a->requires_grad || b->requires_grad;
+    auto result = std::make_shared<Tensor>(a->shape, 0.0, req_grad);
+
+    for (size_t i = 0; i < a->data.size(); i++) {
+        result->data[i] = a->data[i] + b->data[i];
+    }
+
+    if (req_grad) {
+        result->prev = {a, b};
+
+        result->_backward = [a, b, result]() {
+            if (a->requires_grad) {
+                for (size_t i = 0; i < a->grad->data.size(); i++) {
+                    a->grad->data[i] += result->grad->data[i];
                 }
             }
-            if (right_grad) {
-                for (size_t i = 0; i < right_grad->data.size(); i++) {
-                    right_grad->data[i] += res_grad->data[i];
+            if (b->requires_grad) {
+                for (size_t i = 0; i < b->grad->data.size(); i++) {
+                    b->grad->data[i] += result->grad->data[i];
                 }
             }
         };
-        result.prev = {left_grad, right_grad};
     }
     return result;
 }
@@ -176,4 +175,26 @@ void Tensor::build_topo(std::shared_ptr<Tensor> curr,
         build_topo(parent, topo, visited);
     }
     topo.push_back(curr);
+}
+
+void Tensor::backward() {
+    std::vector<std::shared_ptr<Tensor>> topo;
+    std::unordered_set<Tensor*> visited;
+    build_topo(shared_from_this(), topo, visited);
+
+    for (auto& t : topo) {
+        if (t->grad) {
+            t->zero_grad();
+        }
+    }
+
+    if (this->grad) {
+        this->grad->fill(1.0);
+    }
+
+    for (auto it = topo.rbegin(); it != topo.rend(); ++it) {
+        if ((*it)->_backward) {
+            (*it)->_backward();
+        }
+    }
 }

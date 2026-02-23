@@ -21,6 +21,8 @@ public:
 
     std::function<void()> _backward;
 
+    static std::shared_ptr<Tensor> add(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b);
+
     Tensor(std::vector<size_t> shape, double initial_value = 0.0, bool requires_grad = false);
 
     double& operator()(const std::vector<size_t>& indices);
@@ -36,8 +38,6 @@ public:
     std::vector<double>& get_data();
 
     Tensor& operator+=(const Tensor& other);
-
-    Tensor operator+(const Tensor& other) const;
 
     Tensor matmul(const Tensor& other) const;
 
