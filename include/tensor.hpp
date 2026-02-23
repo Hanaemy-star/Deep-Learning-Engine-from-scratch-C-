@@ -3,21 +3,30 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <memory>
 
 class Tensor {
 private:
     std::vector<double> data;
     std::vector<size_t> shape;
+    std::shared_ptr<Tensor> grad;
+    std::vector<std::shared_ptr<Tensor>> prev;
+    bool requires_grad;
+
+    std::function<void()> _backward;
+
     size_t calculate_size(const std::vector<size_t>& s);
 
 public:
-    Tensor(std::vector<size_t> shape, double initial_value = 0.0);
+    Tensor(std::vector<size_t> shape, double initial_value = 0.0, bool requires_grad = false);
 
     double& operator()(const std::vector<size_t>& indices);
 
     double operator()(const std::vector<size_t>& indices) const;
 
     void reshape(std::vector<size_t> nshape);
+
+    std::shared_ptr<Tensor> get_grad() const;
 
     Tensor& operator+=(const Tensor& other);
 
@@ -34,4 +43,6 @@ public:
     Tensor relu() const;
 
     Tensor operator*(const double& scalar) const;
+
+    void backward();
 };

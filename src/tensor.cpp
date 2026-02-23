@@ -1,7 +1,11 @@
 #include "tensor.hpp"
 #include <numeric>
 
-Tensor::Tensor(std::vector<size_t> shape, double initial_value) : shape(shape) {
+
+Tensor::Tensor(std::vector<size_t> shape, double initial_value, bool requires_grad) : shape(shape) {
+    if (requires_grad) {
+        grad = std::make_shared<Tensor>(shape, 0.0, false);
+    }
     size_t total_size = calculate_size(shape);
     data = std::vector<double>(total_size, initial_value);
 }
@@ -119,4 +123,8 @@ Tensor Tensor::relu() const {
 Tensor Tensor::operator*(const double& scalar) const {
     Tensor result = *this;
     return result.apply_([scalar](double val) {return val * scalar;});
+}
+
+std::shared_ptr<Tensor> Tensor::get_grad() const {
+    return this->grad;
 }

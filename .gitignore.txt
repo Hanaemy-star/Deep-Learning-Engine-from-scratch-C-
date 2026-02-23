@@ -1,6 +1,6 @@
 # Prerequisites
 *.d
-
+.txt
 .idea
 .md
 # Compiled Object files

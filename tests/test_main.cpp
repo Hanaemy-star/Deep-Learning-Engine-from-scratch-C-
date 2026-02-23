@@ -22,7 +22,6 @@ int main() {
         Tensor Z = Y.relu();
         std::cout << "Result after ReLU:" << std::endl;
         Z.print();
-
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
