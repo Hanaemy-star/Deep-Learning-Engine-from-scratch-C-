@@ -16,7 +16,7 @@ A high-performance Machine Learning library built from scratch in C++. This proj
 ## 📈 Roadmap
 - [x] Basic Matrix/Vector operations
 - [ ] Generalized N-dimensional Tensors
-- [ ] Automatic Differentiation (Autograd)
+- [x] Automatic Differentiation (Autograd)
 - [ ] Neural Network Layers (Dense, ReLU, Softmax)
 - [ ] Optimization algorithms (SGD, Adam)
 
