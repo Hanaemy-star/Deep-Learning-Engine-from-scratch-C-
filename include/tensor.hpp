@@ -39,6 +39,8 @@ public:
 
     Tensor& operator+=(const Tensor& other);
 
+    std::shared_ptr<Tensor> transpose() const;
+
     Tensor matmul(const Tensor& other) const;
 
     void print() const;

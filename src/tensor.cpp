@@ -1,6 +1,6 @@
 #include "tensor.hpp"
 #include <numeric>
-
+#include <algorithm>
 
 Tensor::Tensor(std::vector<size_t> shape, double initial_value, bool requires_grad) : shape(shape) , requires_grad(requires_grad) {
     if (requires_grad) {
@@ -91,6 +91,23 @@ std::shared_ptr<Tensor> Tensor::add(std::shared_ptr<Tensor> a, std::shared_ptr<T
                 }
             }
         };
+    }
+    return result;
+}
+
+std::shared_ptr<Tensor> Tensor::transpose() const {
+    if (this->shape.size() != 2) throw std::invalid_argument("Size must be 2");
+
+    std::vector<size_t> new_shape = this->shape;
+    std::reverse(new_shape.begin(), new_shape.end());
+
+    auto result = std::make_shared<Tensor>(new_shape, 0.0,
+                                             this->requires_grad);
+
+    for (size_t i = 0; i < this->shape[0]; i++) {
+        for (size_t j = 0; j < this->shape[1]; j++) {
+            (*result)({j, i}) = (*this)({i, j});
+        }
     }
     return result;
 }
