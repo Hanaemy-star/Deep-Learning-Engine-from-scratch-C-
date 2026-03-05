@@ -23,6 +23,8 @@ public:
 
     static std::shared_ptr<Tensor> add(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b);
 
+    static std::shared_ptr<Tensor> matrixmul(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b);
+
     Tensor(std::vector<size_t> shape, double initial_value = 0.0, bool requires_grad = false);
 
     double& operator()(const std::vector<size_t>& indices);
@@ -41,7 +43,7 @@ public:
 
     std::shared_ptr<Tensor> transpose() const;
 
-    Tensor matmul(const Tensor& other) const;
+    std::shared_ptr<Tensor> matmul(std::shared_ptr<Tensor> other) const;
 
     void print() const;
 

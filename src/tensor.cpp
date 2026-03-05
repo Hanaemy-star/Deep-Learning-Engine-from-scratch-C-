@@ -95,6 +95,31 @@ std::shared_ptr<Tensor> Tensor::add(std::shared_ptr<Tensor> a, std::shared_ptr<T
     return result;
 }
 
+std::shared_ptr<Tensor> Tensor::matrixmul(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b) {
+    std::shared_ptr<Tensor> result = a->matmul(b);
+
+    bool req_grad = a->requires_grad || b->requires_grad;
+
+    if (req_grad) {
+        result->requires_grad = true;
+        result->grad = std::make_shared<Tensor>(result->shape, 0.0, false);
+
+        result->prev = {a, b};
+
+        result->_backward = [a, b, result]() {
+            if (a->requires_grad) {
+                auto d_a = result->grad->matmul(b->transpose());
+                *(a->grad) += *d_a;
+            }
+            if (b->requires_grad) {
+                auto d_b = a->transpose()->matmul(result->grad);
+                *(b->grad) += *d_b;
+            }
+        };
+    }
+    return result;
+}
+
 std::shared_ptr<Tensor> Tensor::transpose() const {
     if (this->shape.size() != 2) throw std::invalid_argument("Size must be 2");
 
@@ -112,25 +137,25 @@ std::shared_ptr<Tensor> Tensor::transpose() const {
     return result;
 }
 
-Tensor Tensor::matmul(const Tensor& other) const {
-    if (shape.size() != 2 || other.shape.size() != 2)
+std::shared_ptr<Tensor> Tensor::matmul(std::shared_ptr<Tensor> other) const {
+    if (shape.size() != 2 || other->shape.size() != 2)
         throw std::invalid_argument("matmul is for 2D tensors only");
-    if (shape[1] != other.shape[0])
+    if (shape[1] != other->shape[0])
         throw std::invalid_argument("Inner dimensions must match");
 
     size_t M = shape[0];
     size_t K = shape[1];
-    size_t N = other.shape[1];
-
-    Tensor result({M, N}, 0.0);
+    size_t N = other->shape[1];
+    auto d = {M, N};
+    auto result = std::make_shared<Tensor>(d, 0.0);
 
     for (size_t i = 0; i < M; ++i) {
         for (size_t j = 0; j < N; ++j) {
             double sum = 0.0;
             for (size_t k = 0; k < K; ++k) {
-                sum += (*this)({i, k}) * other({k, j});
+                sum += (*this)({i, k}) * (*other)({k, j});
             }
-            result({i, j}) = sum;
+            (*result)({i, j}) = sum;
         }
     }
     return result;

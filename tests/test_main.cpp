@@ -1,23 +1,25 @@
 #include "tensor.hpp"
 
-void test_transpose() {
-    auto a = std::make_shared<Tensor>(std::vector<size_t>{2, 3});
-    a->get_data() = {1, 2, 3, 4, 5, 6};
-
-    std::cout << "Original 2x3 matrix:" << std::endl;
-    a->print();
-
-    auto b = a->transpose();
-
-    std::cout << "\nTransposed 3x2 matrix:" << std::endl;
-    b->print();
-}
-
 int main() {
     try {
-        test_transpose();
+        auto X = std::make_shared<Tensor>(std::vector<size_t>{1, 2}, 0.0, false);
+        X->get_data() = {1.0, 2.0};
+
+        auto W = std::make_shared<Tensor>(std::vector<size_t>{2, 2}, 0.0, true);
+        W->get_data() = {2.0, 0.0, 0.0, 3.0};
+
+        auto Y = Tensor::matrixmul(X, W);
+
+        std::cout << "Forward Y:" << std::endl;
+        Y->print();
+
+        Y->backward();
+
+        std::cout << "\nGradient of W:" << std::endl;
+        W->get_grad()->print();
+
     } catch (const std::exception& e) {
-        std::cerr << "Fatal Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
     }
 
     return 0;
