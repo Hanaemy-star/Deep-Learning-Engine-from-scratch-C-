@@ -10,6 +10,8 @@ add_library(math_lib
         src/matrix.cpp
         include/tensor.hpp
         src/tensor.cpp
+        include/Optimizer.hpp
+        src/optimizer.cpp
 )
 
 target_include_directories(math_lib PUBLIC include)
