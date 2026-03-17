@@ -278,3 +278,11 @@ std::shared_ptr<Tensor> Tensor::mse_loss(std::shared_ptr<Tensor> pred, std::shar
     }
     return result;
 }
+
+std::shared_ptr<Tensor> operator+(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b) {
+    return Tensor::add(a, b);
+}
+
+std::shared_ptr<Tensor> operator*(std::shared_ptr<Tensor> a, std::shared_ptr<Tensor> b) {
+    return Tensor::matrixmul(a, b);
+}
